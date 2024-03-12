@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Callout, Text, TextField } from "@radix-ui/themes";
+import { Button, Callout, TextField } from "@radix-ui/themes";
 import React, { useState } from "react";
 import SimpleMDE from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
@@ -28,6 +28,17 @@ const NewIssuePage = () => {
   const [error, setError] = useState("");
   const [isSubmiting, setIsSubmiting] = useState(false);
 
+  const onSubmitForm = handleSubmit(async (data) => {
+    try {
+      setIsSubmiting(true);
+      await axios.post("/api/issues", data);
+      router.push("/issues");
+    } catch (error) {
+      setIsSubmiting(false);
+      setError("An unexpected error ocurred");
+    }
+  });
+
   return (
     <div className="max-w-xl">
       {error && (
@@ -35,19 +46,7 @@ const NewIssuePage = () => {
           <Callout.Text>{error}</Callout.Text>
         </Callout.Root>
       )}
-      <form
-        className=" space-y-3"
-        onSubmit={handleSubmit(async (data) => {
-          try {
-            setIsSubmiting(true);
-            await axios.post("/api/issues", data);
-            router.push("/issues");
-          } catch (error) {
-            setIsSubmiting(false);
-            setError("An unexpected error ocurred");
-          }
-        })}
-      >
+      <form className=" space-y-3" onSubmit={onSubmitForm}>
         <TextField.Root>
           <TextField.Input
             placeholder="Title"
@@ -63,7 +62,9 @@ const NewIssuePage = () => {
           )}
         />
         <ErrorMessage>{errors.description?.message}</ErrorMessage>
-        <Button disabled={isSubmiting}>Submit new issue {isSubmiting && <Spinner />}</Button>
+        <Button disabled={isSubmiting}>
+          Submit new issue {isSubmiting && <Spinner />}
+        </Button>
       </form>
     </div>
   );
